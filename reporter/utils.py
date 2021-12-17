@@ -10,27 +10,28 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 
 
-def export_to_gspread(file):
+def export_to_gspread(file, name, email):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
 
-    credentials = ServiceAccountCredentials.from_json_keyfile_name('metrika-reports-952f7211156b.json', scope)
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        '/home/sobbaka/projects/yametrep/reporter/metrika-reports-952f7211156b.json', scope)
     client = gspread.authorize(credentials)
 
     now = datetime.now()
     date_time = now.strftime("%m-%d-%Y_%H-%M-%S")
-    filename = 'metrika_rep_' + date_time
+    filename = f'{name}_' + date_time
 
 
     spreadsheet = client.create(filename)
-    spreadsheet.share('a.bagaev1989@gmail.com', perm_type='user', role='writer')
+    spreadsheet.share(email, perm_type='user', role='writer')
 
 
     with open(file, 'r') as file_obj:
         content = file_obj.read().encode("utf-8")
         client.import_csv(spreadsheet.id, data=content)
 
-    return f'https://docs.google.com/spreadsheets/d/{spreadsheet.id}/'
+    return f'https://docs.google.com/spreadsheets/d/{spreadsheet.id}/', filename
 
 
 def new_dates(date1, date2):
@@ -45,9 +46,15 @@ def new_dates(date1, date2):
         next_date2 = next_date2.strftime('%Y-%m-%d')
         return next_date1, next_date2
 
-    date_start[1] += 1
-    date_start[2] = monthrange(date2[0], date2[1])[1]
-    next_date2 = date(*date_start)
+    if date_start[1] == 12:
+        date_start[1] = 1
+    else:
+        date_start[1] += 1
+
+    date2 = date_start.copy()
+    date2[2] = monthrange(date2[0], date2[1])[1]
+
+    next_date2 = date(*date2)
     next_date2 = next_date2.strftime('%Y-%m-%d')
 
     return next_date1, next_date2
@@ -111,6 +118,12 @@ def make_row(metric, source_name, data, metric_id, startDates):
     return trafic
 
 
+def greater_than_today(date):
+    now = datetime.now()
+    date = datetime.strptime(date, '%Y-%m-%d')
+    return now < date
+
+
 def get_data_and_dates_metrika(token, ids, date1, date2, months):
 
     header_token = {
@@ -158,7 +171,8 @@ def get_data_and_dates_metrika(token, ids, date1, date2, months):
             for item in my_json['data']:
 
                 if 'filters' in payload.keys():
-                    source = payload['filters']
+                    source = 'Яндекс' if payload['filters'] == "ym:s:SearchEngineRootName=='Яндекс'" else 'Google'
+
                     date = date1
 
                 elif 'dimensions' in payload.keys():
@@ -180,7 +194,12 @@ def get_data_and_dates_metrika(token, ids, date1, date2, months):
         dates.append(date1)
         date1, date2 = new_dates(date1, date2)
 
+        if greater_than_today(date2):
+            return data, dates
+
     return data, dates
+
+
 
 
 def write_csv(data, dates, project_name):
@@ -190,12 +209,13 @@ def write_csv(data, dates, project_name):
     modify_dates = [' ', ]
     for date in startDates:
         modify_dates.append(date)
+
         modify_dates.append(' ')
 
     periods = ['Всего', 'За сутки']
 
 
-    with open(f'{project_name}.csv', 'w', newline='') as file:
+    with open(f'/home/sobbaka/projects/yametrep/reporter/tempfiles/{project_name}.csv', 'w', newline='') as file:
         writer = csv.writer(file, delimiter='\t', dialect='excel')
         writer.writerow(modify_dates)
         periods_row = [' '] + periods * len(startDates) + ['Изменение']
@@ -204,7 +224,7 @@ def write_csv(data, dates, project_name):
         metrics = ['Визиты', 'Отказы', 'Глубина', 'Время на сайте']
 
 
-        source_detail = ["ym:s:SearchEngineRootName=='Яндекс'", "ym:s:SearchEngineRootName=='Google'",]
+        source_detail = ['Яндекс','Google']
 
         for metric_id, metric in enumerate(metrics):
             writer.writerow([metric, ])

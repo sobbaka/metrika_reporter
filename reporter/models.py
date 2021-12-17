@@ -1,4 +1,6 @@
 from django.db import models
+from django.urls import reverse
+
 from accounts.models import CustomUser
 
 
@@ -15,7 +17,7 @@ class Project(models.Model):
     email = models.EmailField('Email для расшаривания')
     counter = models.IntegerField('Счетчик метрики')
     token = models.CharField('Token апи метрики', max_length=155)
-    links = models.ManyToManyField('Link', verbose_name ='Ссылки')
+    links = models.ManyToManyField('Link', verbose_name ='Ссылки', blank=True)
 
     class Meta:
         verbose_name = 'Проект'
@@ -23,6 +25,12 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('project_detail', kwargs={"pk": self.id})
+
+    def project_update_url(self):
+        return reverse('project_edit', kwargs={"pk": self.id})
 
 
 class Link(models.Model):

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="mt-5 text-center">Мои проекты</h1>
+    <div class="row justify-content-center">
+        <div class="col-lg-3 text-center">
+            <ul class="project-data">
+                {% for obj in object_list %}
+                    {% if request.user.id == obj.owner.id %}
+                        <li><a href="{{ obj.get_absolute_url }}">{{ obj.name }}</a></li>
+                    {% endif %}
+                {% empty %}
+                    <h3>Здесь нет ни одного проекта.</h3>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="text-center">
+            <a href="{% url 'project_add' %}" class="btn btn-primary mt-2 mb-2 ">Добавить проект</a>
+        </div>
+    </div>
+{% endblock %}

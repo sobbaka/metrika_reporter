@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-12">
+
+                <h1 class="mt-5 text-center">Проект {{ object.name }}</h1>
+
+                <ul class="mt-3 project-data">
+                    <li><b>Token:</b> {{ object.token }}</li>
+                    <li><b>Счетчик Я.Метрика:</b> {{ object.counter }}</li>
+                </ul>
+
+                <div class="text-center">
+                    <a href="{{ project.project_update_url }}" class="btn btn-primary mt-2 mb-2 btn-block">Изменить
+                        данные</a>
+                </div>
+
+                <div class="accordion" id="accordionPanelsStayOpenExample">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+                                    aria-controls="panelsStayOpen-collapseTwo">
+                                Инструкция
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
+                             aria-labelledby="panelsStayOpen-headingTwo">
+                            <div class="accordion-body">
+                                <p>Для получения отчета необходимо выбрать дату начала дату начала отчетного периода и
+                                    дату окончания
+                                    отчетного периода.</p>
+                                <p>Чтобы сформировать отчет за несколько месяцев необходимо выбрать даты в первом
+                                    отчетном месяце и указать
+                                    количество месяцев для отчета.</p>
+                                <p>Например, чтобы получить отчет за сентябрь, октябрь, ноябрь с отчетной датой конец
+                                    месяца надо выбрать 1
+                                    сентября, затем 30 сентября и выбрать 3 месяца.</p>
+                                <p>Если возникли проблемы - напишите в телеграм <a href="https://t.me/not_tg_bot">@not_tg_bot</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-6 text-center">
+                        <form action="{% url 'create_report' %}" method="post">
+
+                            {% csrf_token %}
+                            <input type="hidden" value="{{ object.token }}" name="token">
+                            <input type="hidden" value="{{ object.name }}" name="name">
+                            <input type="hidden" value="{{ object.counter }}" name="counter">
+                            <input type="hidden" value="{{ object.id }}" name="project_id">
+                            <input type="hidden" value="{{ object.email }}" name="email">
+
+                            <label for="start-date" class="form-label detail-labels mt-3 mb-1">Начало отчетного
+                                периода</label>
+                            <input type="date" name="start-date" value="{{ today }}" max="{{ today }}"
+                                   class="form-control" id="start-date">
+                            <label for="end-date" class="form-label detail-labels mt-3 mb-1">Конец отчетного
+                                периода</label>
+                            <input type="date" name="end-date" value="{{ today }}" max="{{ today }}"
+                                   class="form-control" id="end-date">
+
+                            <label for="months" class="form-label detail-labels mt-3 mb-1">Количество месяцев в
+                                отчете</label>
+                            <input type="number" value="1" name="months" min="1" class="form-control" id="months">
+
+                            <input type="submit" value="Сформировать отчет"
+                                   class="btn btn-primary mt-2 mb-2 text-center">
+                        </form>
+                    </div>
+                </div>
+
+                <h2 class="mt-2">Готовые отчеты</h2>
+
+                <ul>
+                    {% if object.links %}
+                        {% for link in object.links.all %}
+                            <li><a href="{{ link.text }}" target="_blank" class="mt-2">{{ link.name }}</a> <a
+                                    href="/delete-link/{{ link.id }}" class="btn btn-outline-danger mt-2">X</a></li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
