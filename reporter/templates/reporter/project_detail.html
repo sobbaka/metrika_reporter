@@ -11,6 +11,7 @@
                 <ul class="mt-3 project-data">
                     <li><b>Token:</b> {{ object.token }}</li>
                     <li><b>Счетчик Я.Метрика:</b> {{ object.counter }}</li>
+                    <li><b>Email:</b> {{ object.email }}</li>
                 </ul>
 
                 <div class="text-center">
@@ -18,33 +19,36 @@
                         данные</a>
                 </div>
 
-                <div class="accordion" id="accordionPanelsStayOpenExample">
+                <div class="accordion" id="accordionExample">
                     <div class="accordion-item">
-                        <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
-                                    aria-controls="panelsStayOpen-collapseTwo">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                                 Инструкция
                             </button>
                         </h2>
-                        <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
-                             aria-labelledby="panelsStayOpen-headingTwo">
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                             data-bs-parent="#accordionExample">
                             <div class="accordion-body">
-                                <p>Для получения отчета необходимо выбрать дату начала дату начала отчетного периода и
-                                    дату окончания
-                                    отчетного периода.</p>
-                                <p>Чтобы сформировать отчет за несколько месяцев необходимо выбрать даты в первом
-                                    отчетном месяце и указать
-                                    количество месяцев для отчета.</p>
-                                <p>Например, чтобы получить отчет за сентябрь, октябрь, ноябрь с отчетной датой конец
-                                    месяца надо выбрать 1
-                                    сентября, затем 30 сентября и выбрать 3 месяца.</p>
+                                <p>Для получения отчета за определенный период <b>без разбивки</b> по месяцам необходимо
+                                    выбрать дату начала отчетного периода и дату окончания отчетного периода. Количество
+                                    месяцев в отчете оставить 1.</p>
+                                <p>Для получения отчета за определенный период <b>с разбивкой по месяцам</b> надо:</p>
+                                <ul>
+                                    <li>Выбрать выбрать дату начала отчета;</li>
+                                    <li>Выбрать дату окончания отчета за первый месяц;</li>
+                                    <li>Указать количество месяцев в отчете;</li>
+                                </ul>
+                                <p><b>Пример:</b> надо получить отчет с разбивкой по месяцам за период сентябрь,
+                                    октябрь, ноябрь. Выбираем дату Начало 1 сентября, дату Конец 30 сентября, количество
+                                    месяцев ставим 3.</p>
                                 <p>Если возникли проблемы - напишите в телеграм <a href="https://t.me/not_tg_bot">@not_tg_bot</a>
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
+
 
                 <div class="row justify-content-center">
                     <div class="col-lg-6 text-center">

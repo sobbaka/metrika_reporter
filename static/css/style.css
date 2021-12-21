@@ -1,7 +1,14 @@
+.main {
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto;
+}
+
 .btn-block {
     display: inline-block;
 }
 
 .project-data {
     list-style: none;
+    padding-left: 87px;
 }

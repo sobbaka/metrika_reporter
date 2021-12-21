@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
+from yametrep.settings import BASE_DIR
 
 
 def export_to_gspread(file, name, email):
@@ -15,7 +16,7 @@ def export_to_gspread(file, name, email):
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
 
     credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        '/home/sobbaka/projects/yametrep/reporter/metrika-reports-952f7211156b.json', scope)
+        BASE_DIR / 'reporter/metrika-reports-952f7211156b.json', scope)
     client = gspread.authorize(credentials)
 
     now = datetime.now()
@@ -215,7 +216,7 @@ def write_csv(data, dates, project_name):
     periods = ['Всего', 'За сутки']
 
 
-    with open(f'/home/sobbaka/projects/yametrep/reporter/tempfiles/{project_name}.csv', 'w', newline='') as file:
+    with open(BASE_DIR / f'reporter/tempfiles/{project_name}.csv', 'w', newline='') as file:
         writer = csv.writer(file, delimiter='\t', dialect='excel')
         writer.writerow(modify_dates)
         periods_row = [' '] + periods * len(startDates) + ['Изменение']

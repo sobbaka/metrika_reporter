@@ -1,9 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import DetailView, UpdateView, ListView
 
+from yametrep.settings import BASE_DIR
 from .forms import ProjectForm, ProjectCreateForm
 from .models import Project, Link
 
@@ -69,7 +71,9 @@ class ProjectDetail(LoginRequiredMixin, DetailView):
 
     def get_object(self):
         obj = get_object_or_404(
-            self.model.objects.prefetch_related('links'),
+            self.model.objects.prefetch_related(
+                Prefetch('links', queryset=Link.objects.order_by('-id'))
+                ),
             pk=self.kwargs['pk'],
             )
 
@@ -98,11 +102,11 @@ def create_report(request):
 
         write_csv(data, dates, project_name)
 
-        file_exists = os.path.exists(f'/home/sobbaka/projects/yametrep/reporter/tempfiles/{project_name}.csv')
+        file_exists = os.path.exists(BASE_DIR / f'reporter/tempfiles/{project_name}.csv')
 
         if file_exists:
-            path = f'/home/sobbaka/projects/yametrep/reporter/tempfiles/{project_name}.csv'
-            link, name = export_to_gspread(f'/home/sobbaka/projects/yametrep/reporter/tempfiles/{project_name}.csv', project_name, email)
+            path = BASE_DIR / f'reporter/tempfiles/{project_name}.csv'
+            link, name = export_to_gspread(BASE_DIR / f'reporter/tempfiles/{project_name}.csv', project_name, email)
             link_obj = Link.objects.create(name=name, text=link)
             Project.objects.get(id=request.POST["project_id"]).links.add(link_obj)
 
