@@ -148,9 +148,9 @@ def get_data_and_dates_metrika(token, ids, date1, date2, months):
 
         views = {
             'all': {},
-            'source_detail': {'dimensions': 'ym:s:lastTrafficSource'},
-            'yandex': {'filters': "ym:s:SearchEngineRootName=='Яндекс'"},
-            'google': {'filters': "ym:s:SearchEngineRootName=='Google'"}
+            'source_detail': {'dimensions': 'ym:s:lastsignTrafficSource'},
+            'yandex': {'filters': "ym:s:<attribution>SearchEngineRootName=='Яндекс'"},
+            'google': {'filters': "ym:s:<attribution>SearchEngineRootName=='Google'"}
         }
 
         payload_new = {
@@ -167,12 +167,13 @@ def get_data_and_dates_metrika(token, ids, date1, date2, months):
             payload.update(views[view])
 
             request = requests.get('https://api-metrika.yandex.ru/stat/v1/data', params=payload, headers=header_token)
+            print(request.url)
             my_json = json.loads(request.content)
 
             for item in my_json['data']:
 
                 if 'filters' in payload.keys():
-                    source = 'Яндекс' if payload['filters'] == "ym:s:SearchEngineRootName=='Яндекс'" else 'Google'
+                    source = 'Яндекс' if payload['filters'] == "ym:s:<attribution>SearchEngineRootName=='Яндекс'" else 'Google'
 
                     date = date1
 
