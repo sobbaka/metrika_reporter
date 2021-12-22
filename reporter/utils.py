@@ -1,6 +1,8 @@
 import requests
 import json
 import csv
+import os
+from dotenv import load_dotenv
 from calendar import monthrange
 import time
 from datetime import date
@@ -10,13 +12,18 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 from yametrep.settings import BASE_DIR
 
+load_dotenv()
+
 
 def export_to_gspread(file, name, email):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
 
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        BASE_DIR / 'reporter/metrika-reports-952f7211156b.json', scope)
+    GOOGLE_JSON = os.environ.get('GOOGLE_JSON')
+    json_key_file = BASE_DIR / f'reporter/{GOOGLE_JSON}'
+
+
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(json_key_file, scope)
     client = gspread.authorize(credentials)
 
     now = datetime.now()
