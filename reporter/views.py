@@ -4,14 +4,15 @@ from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import DetailView, UpdateView, ListView
+from django.contrib import messages
+import os
+from datetime import date
+from datetime import datetime
 
 from yametrep.settings import BASE_DIR
 from .forms import ProjectForm, ProjectCreateForm
 from .models import Project, Link
-
 from .utils import get_data_and_dates_metrika, write_csv, export_to_gspread
-import os
-from datetime import date
 from accounts.models import CustomUser
 
 @login_required
@@ -88,7 +89,7 @@ class ProjectDetail(LoginRequiredMixin, DetailView):
 @login_required
 def create_report(request):
     if request.method == 'POST':
-        print(request.POST)
+
         project_name = request.POST['name']
         ids = request.POST['counter']
         months = request.POST['months']
@@ -97,6 +98,13 @@ def create_report(request):
         date1 = request.POST['start-date']
         date2 = request.POST['end-date']
         email = request.POST['email']
+
+        if datetime.strptime(date1, '%Y-%m-%d') > datetime.strptime(date2, '%Y-%m-%d'):
+            messages.error(request, 'Дата конца отчета должна быть позже, чем дата начала отчета')
+            return HttpResponseRedirect(f'/{request.POST["project_id"]}/')
+
+
+
 
         data, dates = get_data_and_dates_metrika(token, ids, date1, date2, months)
 
@@ -114,5 +122,5 @@ def create_report(request):
         else:
             # HttpResponseRedirect to error page
             print('error')
-
+    messages.success(request, 'Новый отчет успешно создан')
     return HttpResponseRedirect(f'/{request.POST["project_id"]}/')
