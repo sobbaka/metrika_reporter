@@ -5,3 +5,5 @@ db.sqlite3
 !*/migrations/__init__.py
 .env
 *.json
+*/__pycache__/*
+*/__pycache__/

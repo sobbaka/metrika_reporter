@@ -5,7 +5,6 @@ import os
 from dotenv import load_dotenv
 from calendar import monthrange
 import time
-from datetime import date
 from dateutil.relativedelta import relativedelta
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -43,31 +42,14 @@ def export_to_gspread(file, name, email):
 
 
 def new_dates(date1, date2):
-    next_date1 = datetime.strptime(date1, '%Y-%m-%d') + relativedelta(months=1)
-    next_date1 = next_date1.strftime('%Y-%m-%d')
 
-    date_start = [int(i) for i in date1.split('-')]
+    nxt_date_1 = datetime.strptime(date1, '%Y-%m-%d') + relativedelta(months=1)
+    nxt_date_2 = datetime.strptime(date2, '%Y-%m-%d') + relativedelta(months=1)
 
-    if date_start[2] > 1:
-        date2 = date2
-        next_date2 = datetime.strptime(date2, '%Y-%m-%d') + relativedelta(months=1)
-        next_date2 = next_date2.strftime('%Y-%m-%d')
-        return next_date1, next_date2
+    if nxt_date_1.day == 1:
+        nxt_date_2 = nxt_date_2.replace(day=monthrange(nxt_date_2.year, nxt_date_2.month)[1])
 
-    if date_start[1] == 12:
-        date_start[1] = 1
-    else:
-        date_start[1] += 1
-
-    date2 = date_start.copy()
-    date2[2] = monthrange(date2[0], date2[1])[1]
-
-    next_date2 = date(*date2)
-    next_date2 = next_date2.strftime('%Y-%m-%d')
-
-    return next_date1, next_date2
-
-
+    return nxt_date_1.strftime('%Y-%m-%d'), nxt_date_2.strftime('%Y-%m-%d')
 
 
 def number_of_days_in_month(date):
@@ -174,7 +156,6 @@ def get_data_and_dates_metrika(token, ids, date1, date2, months):
             payload.update(views[view])
 
             request = requests.get('https://api-metrika.yandex.ru/stat/v1/data', params=payload, headers=header_token)
-            print(request.url)
             my_json = json.loads(request.content)
 
             for item in my_json['data']:
