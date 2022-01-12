@@ -12,14 +12,14 @@ from datetime import datetime
 from yametrep.settings import BASE_DIR
 from .forms import ProjectForm, ProjectCreateForm
 from .models import Project, Link
-from .utils import get_data_and_dates_metrika, write_csv, export_to_gspread
+from .utils import get_data_and_dates_metrika, write_csv, export_to_gspread, delete_gspread_file
 from accounts.models import CustomUser
 
 @login_required
 def delete_link(request, pk):
     link = get_object_or_404(Link, pk=pk)
     redirect_id = link.project_set.all()[0].id
-
+    delete_gspread_file(link)
     link.delete()
 
     return HttpResponseRedirect(f'/{redirect_id}/')
@@ -77,7 +77,6 @@ class ProjectDetail(LoginRequiredMixin, DetailView):
                 ),
             pk=self.kwargs['pk'],
             )
-
         return obj
 
 
@@ -103,9 +102,6 @@ def create_report(request):
             messages.error(request, 'Дата конца отчета должна быть позже, чем дата начала отчета')
             return HttpResponseRedirect(f'/{request.POST["project_id"]}/')
 
-
-
-
         data, dates = get_data_and_dates_metrika(token, ids, date1, date2, months)
 
         write_csv(data, dates, project_name)
@@ -114,13 +110,11 @@ def create_report(request):
 
         if file_exists:
             path = BASE_DIR / f'reporter/tempfiles/{project_name}.csv'
-            link, name = export_to_gspread(BASE_DIR / f'reporter/tempfiles/{project_name}.csv', project_name, email)
+            link, name = export_to_gspread(path, project_name, email)
             link_obj = Link.objects.create(name=name, text=link)
             Project.objects.get(id=request.POST["project_id"]).links.add(link_obj)
 
-            print(link)
         else:
-            # HttpResponseRedirect to error page
             print('error')
     messages.success(request, 'Новый отчет успешно создан')
     return HttpResponseRedirect(f'/{request.POST["project_id"]}/')

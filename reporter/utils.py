@@ -13,8 +13,7 @@ from yametrep.settings import BASE_DIR
 
 load_dotenv()
 
-
-def export_to_gspread(file, name, email):
+def gsreap_auth():
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
 
@@ -24,6 +23,19 @@ def export_to_gspread(file, name, email):
 
     credentials = ServiceAccountCredentials.from_json_keyfile_name(json_key_file, scope)
     client = gspread.authorize(credentials)
+
+    return client
+
+
+def delete_gspread_file(link):
+    client = gsreap_auth()
+    file_id = link.text.replace('https://docs.google.com/spreadsheets/d/', '').replace('/', '')
+    client.del_spreadsheet(file_id)
+
+
+def export_to_gspread(file, name, email):
+
+    client = gsreap_auth()
 
     now = datetime.now()
     date_time = now.strftime("%m-%d-%Y_%H-%M-%S")
@@ -67,7 +79,10 @@ def make_row(metric, source_name, data, metric_id, startDates):
     trafic = []
     trafic.append(source_name)
     prev_value = None
-    last_value = None
+    current_value = None
+
+    dayly_prev_value = None
+    dayly_current_value = None
 
     for date in startDates:
         try:
@@ -76,6 +91,7 @@ def make_row(metric, source_name, data, metric_id, startDates):
             if metric == 'Визиты':
                 trafic.append(int(value))
                 day_value = round(value / number_of_days_in_month(date))
+                dayly_prev_value, dayly_current_value = dayly_current_value, day_value
                 trafic.append(day_value)
 
             else:
@@ -98,14 +114,34 @@ def make_row(metric, source_name, data, metric_id, startDates):
             trafic.append(value)
             trafic.append(value)
 
-        prev_value = last_value
-        last_value = value
+        prev_value, current_value = current_value, value
+
     try:
-        progress_value = f'{round((last_value / prev_value - 1) * 100, 1)}%'.replace('.', ',')
+        progress_value = f'{round((current_value / prev_value - 1) * 100, 1)}%'.replace('.', ',')
         trafic.append(progress_value)
+
+
     except:
         trafic.append('-')
+
+
+
+    try:
+
+        if dayly_prev_value is not None:
+            progress_value = f'{round((dayly_current_value / dayly_prev_value - 1) * 100, 1)}%'.replace('.', ',')
+            trafic.append(progress_value)
+
+        else:
+            progress_value = f'{round((current_value / prev_value - 1) * 100, 1)}%'.replace('.', ',')
+            trafic.append(progress_value)
+
+    except:
+        trafic.append('-')
+
     return trafic
+
+
 
 
 def greater_than_today(date):
@@ -208,7 +244,7 @@ def write_csv(data, dates, project_name):
     with open(BASE_DIR / f'reporter/tempfiles/{project_name}.csv', 'w', newline='') as file:
         writer = csv.writer(file, delimiter='\t', dialect='excel')
         writer.writerow(modify_dates)
-        periods_row = [' '] + periods * len(startDates) + ['Изменение']
+        periods_row = [' '] + periods * len(startDates) + ['Изменение за месяц'] + ['Изменение за сутки']
         writer.writerow(periods_row)
 
         metrics = ['Визиты', 'Отказы', 'Глубина', 'Время на сайте']
