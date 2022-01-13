@@ -7,3 +7,4 @@ db.sqlite3
 *.json
 */__pycache__/*
 */__pycache__/
+*38.pyc
