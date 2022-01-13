@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+        {% block title %}
+            Проект {{ object.name }}
+        {% endblock %}
+
 {% block content %}
     {% if messages %}
         {% for message in messages %}

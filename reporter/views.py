@@ -21,7 +21,7 @@ def delete_link(request, pk):
     redirect_id = link.project_set.all()[0].id
     delete_gspread_file(link)
     link.delete()
-
+    messages.success(request, 'Документ удален')
     return HttpResponseRedirect(f'/{redirect_id}/')
 
 
@@ -53,8 +53,6 @@ class ProjectAdd(LoginRequiredMixin, ListView):
 
             return redirect(new_project)
 
-
-
 class ProjectEdit(LoginRequiredMixin, UpdateView):
 
     template_name = 'reporter/project_edit.html'
@@ -64,10 +62,18 @@ class ProjectEdit(LoginRequiredMixin, UpdateView):
         id = self.kwargs.get('pk')
         return Project.objects.get(pk=id)
 
+    def post(self, request, *args, **kwargs):
+        project = self.form_class(request.POST)
+
+        if project.is_valid():
+            edited_project = project.save()
+            messages.success(request, 'Новые настройки сохранены')
+            return redirect(edited_project)
+
+
 
 class ProjectDetail(LoginRequiredMixin, DetailView):
     model = Project
-
     template_name = 'reporter/project_detail.html'
 
     def get_object(self):
@@ -115,6 +121,8 @@ def create_report(request):
             Project.objects.get(id=request.POST["project_id"]).links.add(link_obj)
 
         else:
-            print('error')
+            # write log with error
+            messages.error(request, 'Ой, ошибка! Проверьте параметры или свяжитесь с поддержкой.')
+            return HttpResponseRedirect(f'/{request.POST["project_id"]}/')
     messages.success(request, 'Новый отчет успешно создан')
     return HttpResponseRedirect(f'/{request.POST["project_id"]}/')

@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+        {% block title %}
+            Редактирование проекта {{ object.name }}
+        {% endblock %}
+
 {% block content %}
     <h1 class="mt-5 text-center">Редактирование проекта {{ object.name }}</h1>
     <div class="row justify-content-center">

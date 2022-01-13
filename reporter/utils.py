@@ -1,12 +1,7 @@
-import requests
-import json
-import csv
-import os
+import requests, json, csv, os, gspread, time
 from dotenv import load_dotenv
 from calendar import monthrange
-import time
 from dateutil.relativedelta import relativedelta
-import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 from yametrep.settings import BASE_DIR
@@ -16,14 +11,10 @@ load_dotenv()
 def gsreap_auth():
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
-
     GOOGLE_JSON = os.environ.get('GOOGLE_JSON')
     json_key_file = BASE_DIR / f'reporter/{GOOGLE_JSON}'
-
-
     credentials = ServiceAccountCredentials.from_json_keyfile_name(json_key_file, scope)
     client = gspread.authorize(credentials)
-
     return client
 
 
@@ -36,15 +27,12 @@ def delete_gspread_file(link):
 def export_to_gspread(file, name, email):
 
     client = gsreap_auth()
-
     now = datetime.now()
     date_time = now.strftime("%m-%d-%Y_%H-%M-%S")
     filename = f'{name}_' + date_time
 
-
     spreadsheet = client.create(filename)
     spreadsheet.share(email, perm_type='user', role='writer')
-
 
     with open(file, 'r') as file_obj:
         content = file_obj.read().encode("utf-8")
@@ -54,21 +42,16 @@ def export_to_gspread(file, name, email):
 
 
 def new_dates(date1, date2):
-
     nxt_date_1 = datetime.strptime(date1, '%Y-%m-%d') + relativedelta(months=1)
     nxt_date_2 = datetime.strptime(date2, '%Y-%m-%d') + relativedelta(months=1)
-
     if nxt_date_1.day == 1:
         nxt_date_2 = nxt_date_2.replace(day=monthrange(nxt_date_2.year, nxt_date_2.month)[1])
-
     return nxt_date_1.strftime('%Y-%m-%d'), nxt_date_2.strftime('%Y-%m-%d')
 
 
 def number_of_days_in_month(date):
-    date = [int(value) for value in date.split('-')]
-    year = date[0]
-    month = date[1]
-    return monthrange(year, month)[1]
+    date = datetime.strptime(date, '%Y-%m-%d')
+    return monthrange(date.year, date.month)[1]
 
 
 def convert_time(seconds):
@@ -80,7 +63,6 @@ def make_row(metric, source_name, data, metric_id, startDates):
     trafic.append(source_name)
     prev_value = None
     current_value = None
-
     dayly_prev_value = None
     dayly_current_value = None
 
@@ -111,8 +93,7 @@ def make_row(metric, source_name, data, metric_id, startDates):
                 trafic.append('-')
         except:
             value = '-'
-            trafic.append(value)
-            trafic.append(value)
+            trafic += 2 * [value]
 
         prev_value, current_value = current_value, value
 
@@ -120,28 +101,19 @@ def make_row(metric, source_name, data, metric_id, startDates):
         progress_value = f'{round((current_value / prev_value - 1) * 100, 1)}%'.replace('.', ',')
         trafic.append(progress_value)
 
-
     except:
         trafic.append('-')
 
-
-
     try:
-
         if dayly_prev_value is not None:
             progress_value = f'{round((dayly_current_value / dayly_prev_value - 1) * 100, 1)}%'.replace('.', ',')
             trafic.append(progress_value)
-
         else:
             progress_value = f'{round((current_value / prev_value - 1) * 100, 1)}%'.replace('.', ',')
             trafic.append(progress_value)
-
     except:
         trafic.append('-')
-
     return trafic
-
-
 
 
 def greater_than_today(date):
@@ -161,10 +133,8 @@ def get_data_and_dates_metrika(token, ids, date1, date2, months):
 
     for i in range(months):
 
-        if dates is None:
-            dates = []
-        if data is None:
-            data = {}
+        if dates is None: dates = []
+        if data is None: data = {}
 
         parameters = {
             'date1': date1,
@@ -198,7 +168,6 @@ def get_data_and_dates_metrika(token, ids, date1, date2, months):
 
                 if 'filters' in payload.keys():
                     source = 'Яндекс' if payload['filters'] == "ym:s:<attribution>SearchEngineRootName=='Яндекс'" else 'Google'
-
                     date = date1
 
                 elif 'dimensions' in payload.keys():
@@ -226,17 +195,12 @@ def get_data_and_dates_metrika(token, ids, date1, date2, months):
     return data, dates
 
 
-
-
 def write_csv(data, dates, project_name):
 
-    dates = sorted(dates)
-    startDates = dates
+    startDates = sorted(dates)
     modify_dates = [' ', ]
     for date in startDates:
-        modify_dates.append(date)
-
-        modify_dates.append(' ')
+        modify_dates.extend([date, ' '])
 
     periods = ['Всего', 'За сутки']
 
@@ -249,8 +213,7 @@ def write_csv(data, dates, project_name):
 
         metrics = ['Визиты', 'Отказы', 'Глубина', 'Время на сайте']
 
-
-        source_detail = ['Яндекс','Google']
+        source_detail = ['Яндекс', 'Google']
 
         for metric_id, metric in enumerate(metrics):
             writer.writerow([metric, ])
