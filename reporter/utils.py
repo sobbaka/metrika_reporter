@@ -20,8 +20,8 @@ def gsreap_auth():
 
 def delete_gspread_file(link):
     client = gsreap_auth()
-    file_id = link.text.replace('https://docs.google.com/spreadsheets/d/', '').replace('/', '')
-    client.del_spreadsheet(file_id)
+    if link.gs_id != 'no-id':
+        client.del_spreadsheet(link.gs_id)
 
 
 def export_to_gspread(file, name, email):
@@ -38,7 +38,7 @@ def export_to_gspread(file, name, email):
         content = file_obj.read().encode("utf-8")
         client.import_csv(spreadsheet.id, data=content)
 
-    return f'https://docs.google.com/spreadsheets/d/{spreadsheet.id}/', filename
+    return f'https://docs.google.com/spreadsheets/d/{spreadsheet.id}/', filename, spreadsheet.id
 
 
 def new_dates(date1, date2):

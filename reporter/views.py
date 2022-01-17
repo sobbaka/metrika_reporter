@@ -116,8 +116,8 @@ def create_report(request):
 
         if file_exists:
             path = BASE_DIR / f'reporter/tempfiles/{project_name}.csv'
-            link, name = export_to_gspread(path, project_name, email)
-            link_obj = Link.objects.create(name=name, text=link)
+            link, name, gs_id = export_to_gspread(path, project_name, email)
+            link_obj = Link.objects.create(name=name, text=link, gs_id=gs_id)
             Project.objects.get(id=request.POST["project_id"]).links.add(link_obj)
 
         else:

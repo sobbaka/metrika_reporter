@@ -36,6 +36,7 @@ class Project(models.Model):
 class Link(models.Model):
     name = models.CharField('Название', max_length=155)
     text = models.CharField('Ссылка', max_length=255)
+    gs_id = models.CharField('Google Doc ID', max_length=255, default='no-id')
     file = models.FileField(upload_to="csv_files/", null=True, blank=True)
 
     class Meta:
