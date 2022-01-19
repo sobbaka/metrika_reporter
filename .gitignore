@@ -5,7 +5,9 @@ db.sqlite3
 !*/migrations/__init__.py
 .env
 *.json
-*/__pycache__/*
+__pycache__/
 */__pycache__/
 *38.pyc
+/*cpython-38.pyc
 mytest.py
+.idea
