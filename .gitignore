@@ -12,3 +12,4 @@ __pycache__/
 mytest.py
 .idea
 */test_test.py
+*.pyc
