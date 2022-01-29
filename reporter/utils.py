@@ -122,6 +122,20 @@ def greater_than_today(date):
     return now < date
 
 
+def get_data_from_metrika(payload, payload_params, header_token):
+    payload.update(payload_params)
+    response = requests.get(
+        'https://api-metrika.yandex.ru/stat/v1/data',
+        params=payload,
+        headers=header_token
+    )
+    if response.status_code == 200:
+        metrika_data = json.loads(response.content)
+        return metrika_data
+    else:
+        return None
+
+
 def get_data_and_dates_metrika(token, ids, date1, date2, months):
 
     header_token = {
@@ -158,13 +172,15 @@ def get_data_and_dates_metrika(token, ids, date1, date2, months):
         }
 
         for view in views.keys():
+
             payload = payload_new.copy()
-            payload.update(views[view])
+            payload_params = views[view]
 
-            request = requests.get('https://api-metrika.yandex.ru/stat/v1/data', params=payload, headers=header_token)
-            my_json = json.loads(request.content)
+            metrika_data = get_data_from_metrika(payload, payload_params, header_token)
+            if metrika_data is None:
+                return None
 
-            for item in my_json['data']:
+            for item in metrika_data['data']:
 
                 if 'filters' in payload.keys():
                     source = 'Яндекс' if payload['filters'] == "ym:s:<attribution>SearchEngineRootName=='Яндекс'" else 'Google'

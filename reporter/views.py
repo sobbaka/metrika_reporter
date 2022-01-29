@@ -108,7 +108,15 @@ def create_report(request):
             messages.error(request, 'Дата конца отчета должна быть позже, чем дата начала отчета')
             return HttpResponseRedirect(f'/{request.POST["project_id"]}/')
 
-        data, dates = get_data_and_dates_metrika(token, ids, date1, date2, months)
+        data_from_metrika = get_data_and_dates_metrika(token, ids, date1, date2, months)
+
+        if data_from_metrika is None:
+            messages.error(request, 'Ошибка доступа к Метрике! Проверьте параметры или свяжитесь с поддержкой.')
+            return HttpResponseRedirect(f'/{request.POST["project_id"]}/')
+
+        data, dates = data_from_metrika
+
+
 
         write_csv(data, dates, project_name)
 
