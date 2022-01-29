@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
-from django.views.generic import DetailView, UpdateView, ListView
+from django.views.generic import DetailView, UpdateView, ListView, DeleteView
 from django.contrib import messages
 import os
 from datetime import date
@@ -15,6 +15,26 @@ from .models import Project, Link
 from .utils import get_data_and_dates_metrika, write_csv, export_to_gspread, delete_gspread_file
 from accounts.models import CustomUser
 
+class ProjectDelete(LoginRequiredMixin, DeleteView):
+    model = Project
+    template_name = 'reporter/project_delete.html'
+    success_url = "/"
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+
+        links = self.object.links.all()
+        if links:
+            for link in links:
+                delete_gspread_file(link)
+                link.delete()
+
+        messages.success(request, 'Проект удален')
+        self.object.delete()
+        return HttpResponseRedirect(success_url)
+
+
 @login_required
 def delete_link(request, pk):
     link = get_object_or_404(Link, pk=pk)
@@ -23,7 +43,6 @@ def delete_link(request, pk):
     link.delete()
     messages.success(request, 'Документ удален')
     return HttpResponseRedirect(f'/{redirect_id}/')
-
 
 
 class ProjectList(LoginRequiredMixin, ListView):
@@ -53,6 +72,7 @@ class ProjectAdd(LoginRequiredMixin, ListView):
 
             return redirect(new_project)
 
+
 class ProjectEdit(LoginRequiredMixin, UpdateView):
 
     template_name = 'reporter/project_edit.html'
@@ -71,7 +91,6 @@ class ProjectEdit(LoginRequiredMixin, UpdateView):
             return redirect(edited_project)
 
 
-
 class ProjectDetail(LoginRequiredMixin, DetailView):
     model = Project
     template_name = 'reporter/project_detail.html'
@@ -85,11 +104,11 @@ class ProjectDetail(LoginRequiredMixin, DetailView):
             )
         return obj
 
-
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['today'] = date.today().strftime('%Y-%m-%d')
         return context
+
 
 @login_required
 def create_report(request):
@@ -115,8 +134,6 @@ def create_report(request):
             return HttpResponseRedirect(f'/{request.POST["project_id"]}/')
 
         data, dates = data_from_metrika
-
-
 
         write_csv(data, dates, project_name)
 

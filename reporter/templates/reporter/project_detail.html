@@ -106,6 +106,8 @@
                         {% for link in object.links.all %}
                             <li><a href="{{ link.text }}" target="_blank" class="mt-2">{{ link.name }}</a> <a
                                     href="/delete-link/{{ link.id }}" class="btn btn-outline-danger mt-2">X</a></li>
+                        {% empty %}
+                            <h3>Здесь еще нет отчетов...</h3>
                         {% endfor %}
                     {% endif %}
                 </ul>

@@ -175,7 +175,6 @@ def get_data_and_dates_metrika(token, ids, date1, date2, months):
 
             payload = payload_new.copy()
             payload_params = views[view]
-
             metrika_data = get_data_from_metrika(payload, payload_params, header_token)
             if metrika_data is None:
                 return None
@@ -207,7 +206,6 @@ def get_data_and_dates_metrika(token, ids, date1, date2, months):
 
         if greater_than_today(date2):
             return data, dates
-
     return data, dates
 
 

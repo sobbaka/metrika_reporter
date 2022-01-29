@@ -5,6 +5,22 @@
         {% endblock %}
 
 {% block content %}
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% elif message.tags == 'success' %}
+                <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
     <h1 class="mt-5 text-center mb-3">Мои проекты</h1>
     <div class="container">
 
@@ -13,7 +29,9 @@
                 <ul class="project-data">
                     {% for obj in object_list %}
                         {% if request.user.id == obj.owner.id %}
-                            <li class="mb-2"><a href="{{ obj.get_absolute_url }}">{{ obj.name }}</a></li>
+                            <li class="mb-2"><a href="{{ obj.get_absolute_url }}">{{ obj.name }}</a>
+                            <a href="{% url 'project_delete' pk=obj.id %}" class="btn btn-outline-danger mt-2">X</a>
+                            </li>
                         {% endif %}
                     {% empty %}
                         <h3>Здесь нет ни одного проекта.</h3>
