@@ -1,22 +1,27 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Список проектов
+    Удаление проекта {{ object.name }}
 {% endblock %}
 
 {% block content %}
 
 
-    <h1 class="mt-5 text-center mb-3">Delete project?</h1>
+    <h1 class="mt-5 text-center mb-3">Удалить проект {{ object.name }}?</h1>
     <div class="row justify-content-center">
         <div class="col-lg-4 text-center">
 
             <form method="post">
                 {% csrf_token %}
 
-                <p>Are you sure you want to delete "{{ object }}"?</p>
+                <p>Вы уверены, что хотите удалить проект "{{ object.name }}"? <br>
+                    <strong>Внимание: </strong>все документы, связанные с проектом,
+                    будут также удалены без возможности восстановления.</p>
+<input type="submit" value="Подтвердить" class="btn btn-outline-danger mt-2 mb-2 text-center">
+                <a href="{{ object.get_absolute_url }}" class="btn btn-primary mt-2 mb-2 btn-block">Назад</a>
 
-                <input type="submit" value="Confirm" class="btn btn-primary mt-2 mb-2 text-center">
+
+
             </form>
         </div>
     </div>
