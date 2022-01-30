@@ -12,8 +12,9 @@ from datetime import datetime
 from yametrep.settings import BASE_DIR
 from .forms import ProjectForm, ProjectCreateForm
 from .models import Project, Link
-from .utils import get_data_and_dates_metrika, write_csv, export_to_gspread, delete_gspread_file
+from .utils import get_data_and_dates_metrika, write_csv, export_to_gspread, delete_file_gspread, share_file_gspread
 from accounts.models import CustomUser
+
 
 class ProjectDelete(LoginRequiredMixin, DeleteView):
     model = Project
@@ -27,7 +28,7 @@ class ProjectDelete(LoginRequiredMixin, DeleteView):
         links = self.object.links.all()
         if links:
             for link in links:
-                delete_gspread_file(link)
+                delete_file_gspread(link)
                 link.delete()
 
         messages.success(request, 'Проект удален')
@@ -35,11 +36,22 @@ class ProjectDelete(LoginRequiredMixin, DeleteView):
         return HttpResponseRedirect(success_url)
 
 
+def share_link(request):
+    if request.method == 'POST':
+        link_pk = int(request.POST['link_id'])
+        email = request.POST['email']
+        link = get_object_or_404(Link, pk=link_pk)
+        redirect_id = link.project_set.all()[0].id
+        share_file_gspread(link, email)
+
+        return HttpResponseRedirect(f'/{redirect_id}/')
+
+
 @login_required
 def delete_link(request, pk):
     link = get_object_or_404(Link, pk=pk)
     redirect_id = link.project_set.all()[0].id
-    delete_gspread_file(link)
+    delete_file_gspread(link)
     link.delete()
     messages.success(request, 'Документ удален')
     return HttpResponseRedirect(f'/{redirect_id}/')
@@ -74,7 +86,6 @@ class ProjectAdd(LoginRequiredMixin, ListView):
 
 
 class ProjectEdit(LoginRequiredMixin, UpdateView):
-
     template_name = 'reporter/project_edit.html'
     form_class = ProjectForm
 
@@ -99,9 +110,9 @@ class ProjectDetail(LoginRequiredMixin, DetailView):
         obj = get_object_or_404(
             self.model.objects.prefetch_related(
                 Prefetch('links', queryset=Link.objects.order_by('-id'))
-                ),
+            ),
             pk=self.kwargs['pk'],
-            )
+        )
         return obj
 
     def get_context_data(self, *args, **kwargs):

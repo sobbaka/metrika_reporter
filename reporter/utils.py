@@ -18,10 +18,23 @@ def gsreap_auth():
     return client
 
 
-def delete_gspread_file(link):
+def delete_file_gspread(link):
     client = gsreap_auth()
     if link.gs_id != 'no-id':
         client.del_spreadsheet(link.gs_id)
+
+
+def share_file_gspread(link, email):
+    client = gsreap_auth()
+    if link.gs_id != 'no-id':
+        client.insert_permission(
+            link.gs_id,
+            email,
+            perm_type='user',
+            role='writer'
+        )
+
+
 
 
 def export_to_gspread(file, name, email):

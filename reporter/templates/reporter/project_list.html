@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
-        {% block title %}
-            Список проектов
-        {% endblock %}
+{% block title %}
+    Список проектов
+{% endblock %}
 
 {% block content %}
     {% if messages %}
@@ -25,18 +25,15 @@
     <div class="container">
 
         <div class="row justify-content-center">
-            <div class="main">
-                <ul class="project-data">
-                    {% for obj in object_list %}
-                        {% if request.user.id == obj.owner.id %}
-                            <li class="mb-2"><a href="{{ obj.get_absolute_url }}">{{ obj.name }}</a>
-                            <a href="{% url 'project_delete' pk=obj.id %}" class="btn btn-outline-danger mt-2">X</a>
-                            </li>
-                        {% endif %}
-                    {% empty %}
-                        <h3>Здесь нет ни одного проекта.</h3>
-                    {% endfor %}
-                </ul>
+            <div class="main project_list_wrapper">
+                {% for obj in object_list %}
+                    {% if request.user.id == obj.owner.id %}
+                        <a href="{{ obj.get_absolute_url }}" class="btn btn-outline-dark btn-project mt-2">{{ obj.name }}</a>
+                    {% endif %}
+                {% empty %}
+                    <h3>Здесь нет ни одного проекта.</h3>
+                {% endfor %}
+
             </div>
             <div class="col-xs-12 text-center">
                 <a href="{% url 'project_add' %}" class="btn btn-primary mt-2 mb-2 ">Добавить проект</a>

@@ -8,7 +8,15 @@
     display: inline-block;
 }
 
-.project-data {
+.project_link_list {
     list-style: none;
-    padding-left: 86px;
+}
+
+.project_list_wrapper{
+    text-align: center;
+}
+
+.btn-project {
+    display: inline-block;
+    min-width: 200px;
 }

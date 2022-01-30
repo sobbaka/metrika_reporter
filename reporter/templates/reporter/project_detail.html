@@ -99,15 +99,23 @@
                     </div>
                 </div>
 
-                <h2 class="mt-2">Готовые отчеты</h2>
+                <h2 class="mt-4 text-center">Готовые отчеты</h2>
 
-                <ul>
+                <ul class="project_link_list">
                     {% if object.links %}
                         {% for link in object.links.all %}
-                            <li><a href="{{ link.text }}" target="_blank" class="mt-2">{{ link.name }}</a> <a
-                                    href="/delete-link/{{ link.id }}" class="btn btn-outline-danger mt-2">X</a></li>
+                            <li><a href="{{ link.text }}" target="_blank" class="btn btn-outline-dark mt-2">{{ link.name }}</a>
+
+
+
+                                <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal"
+                                        data-bs-target="#exampleModal" id="{{ link.id }}" onClick="add_email_form(this.id)">
+                                  Выдать доступ
+                                </button>
+
+                                <a href="/delete-link/{{ link.id }}" class="btn btn-outline-danger mt-2">X</a></li>
                         {% empty %}
-                            <h3>Здесь еще нет отчетов...</h3>
+                            <p class="mt-2 text-center">Здесь еще нет отчетов...</p>
                         {% endfor %}
                     {% endif %}
                 </ul>
@@ -115,6 +123,44 @@
             </div>
         </div>
     </div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Предоставление доступа к файлу отчета</h5>
+          <p></p>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+        <form action="{%  url 'share_link' %}" method="post">
+      <div class="modal-body">
+
+                {% csrf_token %}
+                <input id="link_id_input" class="form-control form-control-lg" type="hidden" placeholder="link id"
+                       aria-label=".form-control-lg example" name="link_id">
+                <input class="form-control form-control-lg" type="text" placeholder="Введите email"
+                       aria-label=".form-control-lg example" name="email">
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        <button type="submit" class="btn btn-primary text-center">Save changes</button>
+      </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+
+
+<script type="text/javascript">
+  function add_email_form(clicked_id)
+  {
+      document.getElementById("link_id_input").value = clicked_id
+  }
+</script>
 
 {% endblock %}
 
