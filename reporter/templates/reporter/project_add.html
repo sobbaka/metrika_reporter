@@ -5,16 +5,18 @@
         {% endblock %}
 
 {% block content %}
+
     <h1 class="mt-5 text-center">Создание нового проекта</h1>
     <div class="row justify-content-center">
         <div class="col-lg-4 text-center">
+
             <form action="{% url 'project_add' %}" method="post">
                 {% csrf_token %}
                 {{ form }}
                 <input type="hidden" value="{{ request.user.id }}" name="user_id">
                 <input type="submit" value="Создать проект" class="btn btn-primary mt-2 mb-2 text-center">
-
             </form>
+
         </div>
     </div>
 
