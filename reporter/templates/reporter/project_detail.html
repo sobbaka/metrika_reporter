@@ -28,18 +28,42 @@
 
                 <h1 class="mt-5 text-center">Проект {{ object.name }}</h1>
 
-                <ul class="mt-3 project-data">
-                    <li><b>Token:</b> {{ object.token }}</li>
-                    <li><b>Счетчик Я.Метрика:</b> {{ object.counter }}</li>
-                    <li><b>Email:</b> {{ object.email }}</li>
-                </ul>
 
-                <div class="text-center">
-                    <a href="{{ project.project_update_url }}" class="btn btn-primary mt-2 mb-2 btn-block">Изменить
-                        данные</a>
 
-                    <a href="{% url 'project_delete' pk=project.id %}" class="btn btn-outline-danger mt-2 mb-2">Удалить проект</a>
-                </div>
+                {% if object.name == 'test project 1' %}
+                    <ul class="mt-3 project-data">
+                        <li><b>Token:</b> **********</li>
+                        <li><b>Счетчик Я.Метрика:</b> **********</li>
+                        <li><b>Email:</b> {{ object.email }}</li>
+                    </ul>
+
+                    <div class="text-center">
+                        <a href="#" class="btn btn-primary mt-2 mb-2 btn-block">Изменить
+                            данные</a>
+
+                        <a href="#" class="btn btn-outline-danger mt-2 mb-2">Удалить
+                            проект</a>
+
+                    <p>Чтобы протестировать функции Изменить данные и Удалить проект создайте новый проект.</p>
+                    </div>
+
+                {% else %}
+
+                    <ul class="mt-3 project-data">
+                        <li><b>Token:</b> {{ object.token }}</li>
+                        <li><b>Счетчик Я.Метрика:</b> {{ object.counter }}</li>
+                        <li><b>Email:</b> {{ object.email }}</li>
+                    </ul>
+
+                    <div class="text-center">
+                        <a href="{{ project.project_update_url }}" class="btn btn-primary mt-2 mb-2 btn-block">Изменить
+                            данные</a>
+
+                        <a href="{% url 'project_delete' pk=project.id %}" class="btn btn-outline-danger mt-2 mb-2">Удалить
+                            проект</a>
+                    </div>
+
+                {% endif %}
 
                 <div class="accordion" id="accordionExample">
                     <div class="accordion-item">
